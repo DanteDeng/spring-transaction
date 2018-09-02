@@ -4,7 +4,7 @@ import com.nature.reconciliation.definitions.ReconciliationParam;
 import com.nature.reconciliation.resource.DemoReconciliationResource;
 
 /**
- * 对账资源
+ * 示例对账参数
  */
 public class CommonReconciliationParam implements ReconciliationParam<String, DemoReconciliationResource> {
     /**

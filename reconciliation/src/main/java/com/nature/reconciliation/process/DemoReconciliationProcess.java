@@ -40,8 +40,12 @@ public class DemoReconciliationProcess implements ReconciliationProcess<String, 
         units.add(unit);
     }
 
+    /**
+     * 执行对账过程（异常处理等逻辑可以自定义）
+     * @return 执行结果
+     */
     @Override
-    public Void call() throws Exception {
+    public Void call() {
         MemoryCacheUtil.lock(key); // 分布式锁模拟，控制数据幂等
         try {
             // 执行全部需要执行的对账单元

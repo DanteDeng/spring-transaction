@@ -4,6 +4,7 @@ import java.util.Set;
 
 /**
  * 对账任务
+ * @param <T> 对账数据唯一标识类型
  */
 public interface ReconciliationTask<T> {
 

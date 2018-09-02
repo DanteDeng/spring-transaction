@@ -30,4 +30,16 @@ public interface CacheKey {
      * task已处理数量
      */
     String TASK_HANDLED = "task:handled";
+    /**
+     * 比对成功数据数量
+     */
+    String DATA_COUNT_SUCCESS = "data:count:success";
+    /**
+     * 比对失败数据数量
+     */
+    String DATA_COUNT_FAILURE = "data:count:failure";
+    /**
+     * 处理失败数据的key集合
+     */
+    String KEYS_SET_FAILURE = "keys:set:failure";
 }

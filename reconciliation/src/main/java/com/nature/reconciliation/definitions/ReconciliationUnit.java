@@ -1,8 +1,9 @@
 package com.nature.reconciliation.definitions;
 
 /**
- * 对账单元
- * @param <T> 对账资源类
+ * 对账操作单元
+ * @param <K> 对账数据唯一标识类型
+ * @param <T> 对账数据类型
  */
 public interface ReconciliationUnit<K, T extends ReconciliationResource> {
 

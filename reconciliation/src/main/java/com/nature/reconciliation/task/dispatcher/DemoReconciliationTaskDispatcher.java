@@ -42,6 +42,8 @@ public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispa
         final AtomicInteger currCount = new AtomicInteger(0);   // 当前第几个任务
         MemoryCacheUtil.setInt(CacheKey.TASK_COUNT, 0); // 正在同时进行的任务数量
         MemoryCacheUtil.setInt(CacheKey.TASK_HANDLED, 0); // 已处理的任务数量
+        MemoryCacheUtil.setInt(CacheKey.DATA_COUNT_SUCCESS, 0); // 成功数据统计
+        MemoryCacheUtil.setInt(CacheKey.DATA_COUNT_FAILURE, 0); // 失败数据统计
 
         ScheduledFuture<?> future = schedule.scheduleAtFixedRate(() -> {
             if (handledCount.get() >= listSize) { // 总处理数据数量达到需要处理的总数据数量则关闭分发任务
@@ -70,24 +72,24 @@ public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispa
                 task.setTasks(set);
                 task.executeTasks();
                 MemoryCacheUtil.incrementAndGet(CacheKey.TASK_COUNT); // 当前正在执行的任务数量+1
-                MemoryCacheUtil.incrementAndGet(CacheKey.TASK_HANDLED); // 已处理任务总数+1
                 handledCount.addAndGet(toIndex - fromIndex); // 已处理数据量更新
             }
 
         }, 0, 1, TimeUnit.MILLISECONDS);
 
-        try {
-            while (true) {
-                // 任务全部处理完则停止任务，（发送消息通知对账任务全部处理完成，暂时省略此逻辑）
-                if (handledCount.get() >= listSize) {
+        while (true) { // 阻塞线程
+            // 任务全部处理完则停止任务，（发送消息通知对账任务全部处理完成，暂时省略此逻辑）
+            if (MemoryCacheUtil.getInt(CacheKey.TASK_HANDLED) >= taskTotal) {
 
-                    System.out.println(String.format("dispatch end schedule is %s", schedule));
+                System.out.println(String.format("dispatch end schedule is %s", schedule));
 
-                    break;
-                }
+                break;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            try { // 避免结果查询过度频繁
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         System.out.println(String.format("dispatch end executor = %s task handled %s", schedule, MemoryCacheUtil.getInt(CacheKey.TASK_HANDLED)));

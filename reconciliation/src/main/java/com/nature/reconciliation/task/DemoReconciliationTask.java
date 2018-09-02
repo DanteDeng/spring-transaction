@@ -71,8 +71,9 @@ public class DemoReconciliationTask implements ReconciliationTask<String> {
                 }
             }
             System.out.println(String.format("execute tasks end executor is %s", executor));
-            // 正执行线程数-1
-            MemoryCacheUtil.decrementAndGet(CacheKey.TASK_COUNT);
+
+            MemoryCacheUtil.decrementAndGet(CacheKey.TASK_COUNT);// 正执行线程数-1
+            MemoryCacheUtil.incrementAndGet(CacheKey.TASK_HANDLED); // 已处理任务总数+1
         }).start();
     }
 }

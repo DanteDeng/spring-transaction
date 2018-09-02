@@ -4,7 +4,9 @@ import java.util.concurrent.Callable;
 
 /**
  * 对账过程
- * @param <T> 对账资源类
+ * @param <K> 对账数据唯一标识类型
+ * @param <T> 对账数据类型
+ * @param <R> 对账完成返回结果类型
  */
 public interface ReconciliationProcess<K, T extends ReconciliationResource, R> extends Callable<R> {
 
