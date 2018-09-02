@@ -1,5 +1,6 @@
 package com.nature.reconciliation.comparator;
 
+import com.nature.ioc.annotations.ContextComponent;
 import com.nature.reconciliation.definitions.ReconciliationComparator;
 import com.nature.reconciliation.definitions.ReconciliationParam;
 import com.nature.reconciliation.resource.DemoReconciliationResource;
@@ -7,6 +8,7 @@ import com.nature.reconciliation.resource.DemoReconciliationResource;
 /**
  * 示例数据比对器
  */
+@ContextComponent
 public class DemoReconciliationComparator implements ReconciliationComparator<String, DemoReconciliationResource> {
 
     /**

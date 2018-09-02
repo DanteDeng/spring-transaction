@@ -1,5 +1,6 @@
 package com.nature.reconciliation.postprocessor;
 
+import com.nature.ioc.annotations.ContextComponent;
 import com.nature.reconciliation.constant.CacheKey;
 import com.nature.reconciliation.definitions.ReconciliationParam;
 import com.nature.reconciliation.definitions.ReconciliationPostProcessor;
@@ -9,6 +10,7 @@ import com.nature.reconciliation.utils.MemoryCacheUtil;
 /**
  * 示例对账后置处理器
  */
+@ContextComponent
 public class DemoReconciliationPostProcessor implements ReconciliationPostProcessor<String, DemoReconciliationResource> {
 
     /**

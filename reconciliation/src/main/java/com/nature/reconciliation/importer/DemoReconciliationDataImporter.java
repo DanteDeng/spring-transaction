@@ -1,5 +1,6 @@
 package com.nature.reconciliation.importer;
 
+import com.nature.ioc.annotations.ContextComponent;
 import com.nature.reconciliation.constant.CacheKey;
 import com.nature.reconciliation.definitions.ReconciliationDataImporter;
 import com.nature.reconciliation.resource.DemoReconciliationResource;
@@ -16,6 +17,7 @@ import java.util.concurrent.Future;
 /**
  * 示例数据导入（对账操作前置处理，包括：数据分组、聚合、打包、格式化等）
  */
+@ContextComponent
 public class DemoReconciliationDataImporter implements ReconciliationDataImporter {
     /**
      * 线程池

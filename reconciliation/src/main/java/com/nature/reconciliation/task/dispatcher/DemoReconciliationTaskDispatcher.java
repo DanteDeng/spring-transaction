@@ -1,5 +1,6 @@
 package com.nature.reconciliation.task.dispatcher;
 
+import com.nature.ioc.annotations.ContextComponent;
 import com.nature.reconciliation.constant.CacheKey;
 import com.nature.reconciliation.definitions.ReconciliationTask;
 import com.nature.reconciliation.definitions.ReconciliationTaskDispatcher;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 示例任务分发（这里虽然使用的是单机多线程，但实际应用的是分布式多机处理方案）
  */
+@ContextComponent
 public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispatcher {
     /**
      * 定时任务线程池
@@ -31,8 +33,8 @@ public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispa
     public void dispatch() {
         // 获取全部数据
         Set<Object> keys = MemoryCacheUtil.getSet(CacheKey.KEYS_SET);
-        List<Object> list = new ArrayList<>();
-        list.addAll(keys); // 使用list是为了使用sublist功能
+        // 使用list是为了使用sublist功能
+        List<Object> list = new ArrayList<>(keys);
         final int taskSize = 10000; // 单个任务的处理数据数量
         final int taskMax = 3;  // 最大同时处理任务数量
         final AtomicInteger handledCount = new AtomicInteger(0);    // 已处理的数据计数器
@@ -40,17 +42,19 @@ public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispa
         int taskTotal = listSize / taskSize + (listSize % taskSize == 0 ? 0 : 1); // 总任务数量计算
         MemoryCacheUtil.setInt(CacheKey.TASK_TOTAL, taskTotal); // 总任务数量加入缓存，后续控制任务结束使用
         final AtomicInteger currCount = new AtomicInteger(0);   // 当前第几个任务
+
         MemoryCacheUtil.setInt(CacheKey.TASK_COUNT, 0); // 正在同时进行的任务数量
         MemoryCacheUtil.setInt(CacheKey.TASK_HANDLED, 0); // 已处理的任务数量
         MemoryCacheUtil.setInt(CacheKey.DATA_COUNT_SUCCESS, 0); // 成功数据统计
         MemoryCacheUtil.setInt(CacheKey.DATA_COUNT_FAILURE, 0); // 失败数据统计
 
-        ScheduledFuture<?> future = schedule.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> scheduledFuture = schedule.scheduleAtFixedRate(() -> {
             if (handledCount.get() >= listSize) { // 总处理数据数量达到需要处理的总数据数量则关闭分发任务
                 schedule.shutdown();
                 System.out.println(String.format("dispatch end schedule is %s", schedule));
                 return;
             }
+
 
             // 当前任务数量未满并且数据没有全部处理完可以继续开启任务(这个处理可以理解为实际环境中机器数量，这里就像是只有3台机器)
             while (MemoryCacheUtil.getInt(CacheKey.TASK_COUNT) < taskMax && handledCount.get() < listSize) {
@@ -77,6 +81,16 @@ public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispa
 
         }, 0, 1, TimeUnit.MILLISECONDS);
 
+        joinUntilAllDone(taskTotal);
+
+        System.out.println(String.format("dispatch end executor = %s task handled %s", schedule, MemoryCacheUtil.getInt(CacheKey.TASK_HANDLED)));
+    }
+
+    /**
+     * 阻塞线程知道全部数据处理完成
+     * @param taskTotal 处理数据总数
+     */
+    private void joinUntilAllDone(int taskTotal) {
         while (true) { // 阻塞线程
             // 任务全部处理完则停止任务，（发送消息通知对账任务全部处理完成，暂时省略此逻辑）
             if (MemoryCacheUtil.getInt(CacheKey.TASK_HANDLED) >= taskTotal) {
@@ -91,7 +105,5 @@ public class DemoReconciliationTaskDispatcher implements ReconciliationTaskDispa
                 e.printStackTrace();
             }
         }
-
-        System.out.println(String.format("dispatch end executor = %s task handled %s", schedule, MemoryCacheUtil.getInt(CacheKey.TASK_HANDLED)));
     }
 }
