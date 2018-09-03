@@ -53,6 +53,8 @@ public class NatureAppStarter implements AppStarter {
         BeanFactory beanFactory = context.getBeanFactory(); // bean工厂
         Map<String, Object> beansMap = beanFactory.getBeansMap(); // beans map 集合
         Set<BeanDefinition> beansSet = beanFactory.getBeansSet(); // beans set 集合，存放class与bean实例关系集合（beanDefinition）
+        beansMap.put(Context.class.getName(), context); // context 加入bean管理
+        genBeansSet(beansSet, context.getClass(), context);// context 加入bean管理
         try {
             Field field = ClassLoader.class.getDeclaredField("classes");
             field.setAccessible(true);

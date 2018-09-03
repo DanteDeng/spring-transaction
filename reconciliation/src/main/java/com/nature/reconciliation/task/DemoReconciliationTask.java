@@ -1,10 +1,8 @@
 package com.nature.reconciliation.task;
 
-import com.nature.reconciliation.comparator.DemoReconciliationComparator;
+import com.nature.ioc.util.ContextUtil;
 import com.nature.reconciliation.constant.CacheKey;
 import com.nature.reconciliation.definitions.*;
-import com.nature.reconciliation.postprocessor.DemoReconciliationPostProcessor;
-import com.nature.reconciliation.preprocessor.DemoReconciliationPreProcessor;
 import com.nature.reconciliation.process.DemoReconciliationProcess;
 import com.nature.reconciliation.resource.DemoReconciliationResource;
 import com.nature.reconciliation.unit.DemoReconciliationUnit;
@@ -25,17 +23,27 @@ public class DemoReconciliationTask implements ReconciliationTask<String> {
 
     private Set<String> tasks;
 
-    private ReconciliationComparator<String, DemoReconciliationResource> comparator = new DemoReconciliationComparator();
+    private ReconciliationComparator<String, DemoReconciliationResource> comparator;
 
-    private ReconciliationPreProcessor<String, DemoReconciliationResource> preProcessor = new DemoReconciliationPreProcessor();
+    private ReconciliationPreProcessor<String, DemoReconciliationResource> preProcessor;
 
-    private ReconciliationPostProcessor<String, DemoReconciliationResource> postProcessor = new DemoReconciliationPostProcessor();
+    private ReconciliationPostProcessor<String, DemoReconciliationResource> postProcessor;
 
     private ThreadPoolExecutor executor = new ThreadPoolExecutor(10,
             20,
             0,
             TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>());
+
+    /**
+     * 初始化
+     */
+    @SuppressWarnings("unchecked")
+    public DemoReconciliationTask() {   // 从容器中获取同一个bean
+        comparator = ContextUtil.getBean(ReconciliationComparator.class);
+        preProcessor = ContextUtil.getBean(ReconciliationPreProcessor.class);
+        postProcessor = ContextUtil.getBean(ReconciliationPostProcessor.class);
+    }
 
     /**
      * 设置任务列表
