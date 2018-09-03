@@ -34,7 +34,15 @@ public interface BeanFactory {
      */
     <T> T getBean(String id, Class<T> aClass);
 
+    /**
+     * 获取工厂中缓存的全部bean
+     * @return beansMap
+     */
     Map<String, Object> getBeansMap();
 
+    /**
+     * 获取工厂中缓存的全部class-bean集合
+     * @return beansSet
+     */
     Set<BeanDefinition> getBeansSet();
 }

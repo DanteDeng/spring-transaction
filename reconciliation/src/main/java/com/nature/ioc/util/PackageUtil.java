@@ -2,7 +2,6 @@ package com.nature.ioc.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -45,17 +44,17 @@ public class PackageUtil {
         String packagePath = packageName.replace(".", "/");
         Enumeration<URL> urls;
         try {
-            urls = loader.getResources(packagePath);
+            urls = loader.getResources(packagePath);    //获取类加载器扫描的全部路径
 
-            while (urls.hasMoreElements()) {
+            while (urls.hasMoreElements()) {    // 遍历全部满足条件的资源路径
                 URL url = urls.nextElement();
-                if (url == null)
-                    continue;
-                String type = url.getProtocol();
-                if (type.equals(TYPE_FILE)) {
-                    fileNames.addAll(getClassNameByFile(url.getPath(), childPackage));
-                } else if (type.equals(TYPE_JAR)) {
-                    fileNames.addAll(getClassNameByJar(url.getPath(), childPackage));
+                if (url != null) {
+                    String type = url.getProtocol(); //获取路径类型
+                    if (type.equals(TYPE_FILE)) {   // 文件目录
+                        fileNames.addAll(getClassNameByFile(url.getPath(), childPackage));
+                    } else if (type.equals(TYPE_JAR)) { //jar包
+                        fileNames.addAll(getClassNameByJar(url.getPath(), childPackage));
+                    }
                 }
             }
             fileNames.addAll(getClassNameByJars(((URLClassLoader) loader).getURLs(), packagePath, childPackage));
@@ -71,25 +70,24 @@ public class PackageUtil {
      *                     类名集合
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
-     * @throws UnsupportedEncodingException
      */
-    private static List<String> getClassNameByFile(String filePath, boolean childPackage) throws UnsupportedEncodingException {
+    private static List<String> getClassNameByFile(String filePath, boolean childPackage) {
         List<String> myClassName = new ArrayList<>();
         File file = new File(filePath);
         File[] childFiles = file.listFiles();
-        if (childFiles == null)
-            return myClassName;
-        for (File childFile : childFiles) {
-            if (childFile.isDirectory()) {
-                if (childPackage) {
-                    myClassName.addAll(getClassNameByFile(childFile.getPath(), true));
-                }
-            } else {
-                String childFilePath = childFile.getPath();
-                if (childFilePath.endsWith(SUFFIX_CLASS)) {
-                    childFilePath = childFilePath.substring(childFilePath.indexOf(STRING_CLASSES) + 9, childFilePath.lastIndexOf("."));
-                    childFilePath = childFilePath.replace(File.separator, ".");
-                    myClassName.add(childFilePath);
+        if (childFiles != null) {
+            for (File childFile : childFiles) {
+                if (childFile.isDirectory()) {
+                    if (childPackage) { // 查找子目录
+                        myClassName.addAll(getClassNameByFile(childFile.getPath(), true));
+                    }
+                } else {
+                    String childFilePath = childFile.getPath();
+                    if (childFilePath.endsWith(SUFFIX_CLASS)) { //如果是class文件
+                        childFilePath = childFilePath.substring(childFilePath.indexOf(STRING_CLASSES) + 9, childFilePath.lastIndexOf("."));
+                        String className = childFilePath.replace(File.separator, ".");
+                        myClassName.add(className);
+                    }
                 }
             }
         }
@@ -102,13 +100,11 @@ public class PackageUtil {
      * @param packagePath  包路径
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
-     * @throws UnsupportedEncodingException
      */
-    private static List<String> getClassNameByJars(URL[] urls, String packagePath, boolean childPackage) throws UnsupportedEncodingException {
-        List<String> myClassName = new ArrayList<String>();
+    private static List<String> getClassNameByJars(URL[] urls, String packagePath, boolean childPackage) {
+        List<String> myClassName = new ArrayList<>();
         if (urls != null) {
-            for (int i = 0; i < urls.length; i++) {
-                URL url = urls[i];
+            for (URL url : urls) {
                 String urlPath = url.getPath();
                 // 不必搜索classes文件夹
                 if (urlPath.endsWith("classes/")) {
@@ -126,18 +122,22 @@ public class PackageUtil {
      * @param jarPath      jar文件路径
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
-     * @throws UnsupportedEncodingException
      */
-    private static List<String> getClassNameByJar(String jarPath, boolean childPackage) throws UnsupportedEncodingException {
-        List<String> myClassName = new ArrayList<String>();
+    private static List<String> getClassNameByJar(String jarPath, boolean childPackage) {
+        List<String> myClassName = new ArrayList<>();
         String[] jarInfo = jarPath.split("!");
         String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
         String packagePath = jarInfo[1].substring(1);
+        JarFile jarFile = null;
         try {
-            JarFile jarFile = new JarFile(jarFilePath);
-            Enumeration<JarEntry> entrys = jarFile.entries();
-            while (entrys.hasMoreElements()) {
-                JarEntry jarEntry = entrys.nextElement();
+            jarFile = new JarFile(jarFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (jarFile != null) {
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry jarEntry = entries.nextElement();
                 String entryName = jarEntry.getName();
                 if (entryName.endsWith(".class")) {
                     if (childPackage) {
@@ -160,8 +160,6 @@ public class PackageUtil {
                     }
                 }
             }
-        } catch (Exception e) {
-            //SystemLog.Log(LogType.systemInfo, e.getMessage(), e);
         }
         return myClassName;
     }

@@ -10,14 +10,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 注解类型的上下文
+ */
 public class AnnotationContext implements Context {
 
+    /**
+     * 类加载器
+     */
     private ClassLoader classLoader;
-
+    /**
+     * bean工厂
+     */
     private BeanFactory beanFactory;
 
+    /**
+     * 初始化容器
+     */
     public AnnotationContext() {
-        classLoader = Thread.currentThread().getContextClassLoader();
+        setClassLoader(Thread.currentThread().getContextClassLoader());
         Map<String, Object> beansMap = new HashMap<>();
         Set<BeanDefinition> beansSet = new HashSet<>();
         beanFactory = new AnnotationBeanFactory(beansMap, beansSet);

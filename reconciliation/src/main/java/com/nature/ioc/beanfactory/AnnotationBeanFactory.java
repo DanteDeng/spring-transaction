@@ -6,12 +6,24 @@ import com.nature.ioc.model.BeanDefinition;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 注解bean工厂
+ */
 public class AnnotationBeanFactory implements BeanFactory {
-
+    /**
+     * bean-id map集合
+     */
     private Map<String, Object> beansMap;
-
+    /**
+     * bean-class set集合
+     */
     private Set<BeanDefinition> beansSet;
 
+    /**
+     * 初始化注解bean工厂
+     * @param beansMap bean-id map集合
+     * @param beansSet bean-class set集合
+     */
     public AnnotationBeanFactory(Map<String, Object> beansMap, Set<BeanDefinition> beansSet) {
         this.beansMap = beansMap;
         this.beansSet = beansSet;

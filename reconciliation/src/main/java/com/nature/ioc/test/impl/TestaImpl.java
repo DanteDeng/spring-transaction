@@ -13,7 +13,7 @@ public class TestaImpl implements Testa {
 
     @Override
     public void aSay() {
-        System.out.println("b.....................................................");
+        System.out.println("a.....................................................");
         testb.bSay();
     }
 }
